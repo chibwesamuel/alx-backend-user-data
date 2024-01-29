@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-
 """
-DB moduLe
+Implements the add_user method.
 """
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from typing import Any
 
 from user import Base, User
 
 class DB:
     """
-    DB class
+    DB class representing a database session
     """
 
     def __init__(self) -> None:
@@ -32,9 +32,16 @@ class DB:
             self.__session = DBSession()
         return self.__session
 
-    def add_user(self, email: str, hashed_password: str) -> User:
+    def _add_user(self, email: str, hashed_password: str) -> User:
         """
         Add a new user to the database
+
+        Args:
+            email (str): The email of the user
+            hashed_password (str): The hashed password of the user
+
+        Returns:
+            User: The newly created User object
         """
         new_user = User(email=email, hashed_password=hashed_password)
         self._session.add(new_user)
