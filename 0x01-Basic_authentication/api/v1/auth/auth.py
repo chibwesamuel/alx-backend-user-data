@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+Manages the API authentication.
+"""
 
 from typing import List
 from flask import Flask, request
@@ -38,6 +41,8 @@ class Auth:
 
 
 if __name__ == "__main__":
+    """Main function of the app
+    """
     app = Flask(__name__)
     with app.test_request_context('/'):
         a = Auth()
