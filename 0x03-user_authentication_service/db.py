@@ -1,21 +1,15 @@
 #!/usr/bin/env python3
 """
-<<<<<<< HEAD
-Implements the add_user method.
-"""
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-=======
-Implements the different requirements for DB module
+DB module
 """
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm.exc import NoResultFound
->>>>>>> ef028b53ee4110293904de166ea597d6276bbfe2
 from typing import Any
 
 from user import Base, User
+
 
 class DB:
     """
@@ -41,7 +35,8 @@ class DB:
             self.__session = DBSession()
         return self.__session
 
-    def _add_user(self, email: str, hashed_password: str) -> User:
+
+    def add_user(self, email: str, hashed_password: str) -> User:
         """
         Add a new user to the database
 
@@ -55,10 +50,8 @@ class DB:
         new_user = User(email=email, hashed_password=hashed_password)
         self._session.add(new_user)
         self._session.commit()
-<<<<<<< HEAD
         return new_user
-=======
-        return new_user
+
 
     def find_user_by(self, **kwargs: Any) -> User:
         """
@@ -81,4 +74,3 @@ class DB:
             return user
         except InvalidRequestError:
             raise
->>>>>>> ef028b53ee4110293904de166ea597d6276bbfe2
