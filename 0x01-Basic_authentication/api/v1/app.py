@@ -17,41 +17,43 @@ if getenv("AUTH_TYPE") == "auth":
     from api.v1.auth.auth import Auth as AuthType
     auth = AuthType()
 
+
 @app.before_request
 def before_request():
     if auth is None:
         return
     excluded_paths = ['/api/v1/status/', '/api/v1/unauthorized/',
-    '/api/v1/forbidden/']
+                      '/api/v1/forbidden/']
     if request.path not in excluded_paths:
         if auth.authorization_header(request) is None:
             abort(401)
         if auth.current_user(request) is None:
             abort(403)
 
+
 @app.errorhandler(404)
 def not_found(error):
-	""" Not found handler
+    """ Not found handler
     """
     return jsonify({"error": "Not found"}), 404
 
 
 @app.errorhandler(401)
 def unauthorized(error):
-	""" Unauthorized handler
+    """ Unauthorized handler
     """
     return jsonify({"error": "Unauthorized"}), 401
 
 
 @app.errorhandler(403)
 def forbidden(error):
-	""" Forbidden handler
+    """ Forbidden handler
     """
     return jsonify({"error": "Forbidden"}), 403
 
 
 if __name__ == "__main__":
-	""" Main function
+    """ Main function
     """
     host = getenv("API_HOST", "0.0.0.0")
     port = getenv("API_PORT", "5000")
