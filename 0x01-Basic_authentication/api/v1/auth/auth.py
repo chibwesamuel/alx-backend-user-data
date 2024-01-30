@@ -33,7 +33,11 @@ class Auth:
         Returns:
             str: The value of the Authorization header.
         """
-        return None
+        if request is None:
+            return None
+        if 'Authorization' not in request.headers:
+            return None
+        return request.headers['Authorization']
 
     def current_user(self, request=None):
         """ Get the current user from the request
