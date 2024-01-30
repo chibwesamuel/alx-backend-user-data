@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify, redirect
 from auth import Auth
 
 app: Flask = Flask(__name__)
@@ -35,12 +35,28 @@ def sessions() -> tuple:
     password: str = request.form.get("password")
 
     if AUTH.valid_login(email, password):
-        session_id: str = AUTH.create_session(email)
+        session_id = AUTH.create_session(email)
         response = jsonify({"email": email, "message": "logged in"})
         response.set_cookie("session_id", session_id)
-        return "OK", 200
+        return response
     else:
-        abort(401)
+        return jsonify({"message": "invalid email or password"}), 401
+
+
+@app.route("/sessions", methods=["DELETE"])
+def delete_session() -> tuple:
+    """Logout a user
+
+    Returns:
+        tuple: JSON response with logout status
+    """
+    session_id = request.cookies.get("session_id")
+    user = AUTH.get_user_from_session_id(session_id)
+    if user:
+        AUTH.destroy_session(user.id)
+        return redirect("/")
+    else:
+        return jsonify({"message": "invalid session ID"}), 403
 
 
 if __name__ == "__main__":
