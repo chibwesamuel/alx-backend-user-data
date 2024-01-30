@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""
-Implements a _generate_uuid function in the auth module.
-"""
 
-import bcrypt
 import uuid
 from typing import Union
 from db import DB
@@ -95,21 +91,8 @@ class Auth:
             Union[User, None]: The corresponding User object or None.
         """
         if session_id:
-            try:
-                user = self._db.find_user_by(session_id=session_id)
-                if user:
-                    return user
-            except NoResultFound:
-                return None
+            return self._db.find_user_by(session_id=session_id)
         return None
-
-    def destroy_session(self, user_id: int) -> None:
-        """Destroy session for the user.
-
-        Args:
-            user_id (int): The ID of the user.
-        """
-        self._db.update_user(user_id, session_id=None)
 
     def _generate_uuid(self) -> str:
         """Generate a UUID string.
@@ -118,3 +101,20 @@ class Auth:
             str: The generated UUID.
         """
         return str(uuid.uuid4())
+
+    def get_reset_password_token(self, email: str) -> str:
+        """Generate and retrieve reset password token.
+
+        Args:
+            email (str): The email of the user.
+
+        Returns:
+            str: The reset password token.
+        """
+        user = self._db.find_user_by(email=email)
+        if user:
+            reset_token = str(uuid.uuid4())
+            self._db.update_user(user.id, reset_token=reset_token)
+            return reset_token
+        else:
+            raise ValueError(f"User {email} not found")
