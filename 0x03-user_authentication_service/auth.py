@@ -12,14 +12,25 @@ from sqlalchemy.orm.exc import NoResultFound
 
 
 class Auth:
-    """Auth class to interact with the authentication database."""
+    """Auth class to interact with the authentication database.
+    """
 
     def __init__(self):
         self._db = DB()
 
-    def register_user(self, email: str, password: str) -> Union[User, None]:
+    def _hash_password(self, password: str) -> bytes:
+        """Hashes a password string.
+
+        Args:
+            password (str): The password string to hash.
+
+        Returns:
+            bytes: The hashed password.
         """
-        Register a new user.
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+    def register_user(self, email: str, password: str) -> Union[User, None]:
+        """Register a new user.
 
         Args:
             email (str): The email of the user.
@@ -30,33 +41,35 @@ class Auth:
             or None if user already exists.
         """
         try:
-            self._db.find_user_by(email=email)
-            raise ValueError(f"User {email} already exists")
+            user = self._db.find_user_by(email=email)
+            if user:
+                raise ValueError(f"User {email} already exists")
         except NoResultFound:
             hashed_password = self._hash_password(password)
-            return self._db.add_user(email, hashed_password)
+            user = self._db.add_user(email=email, hashed_password=hashed_password)
+            return user
 
     def valid_login(self, email: str, password: str) -> bool:
-        """
-        Check if login is valid.
+        """Validate user login credentials.
 
         Args:
             email (str): The email of the user.
             password (str): The password of the user.
 
         Returns:
-            bool: True if login is valid, False otherwise.
+            bool: True if login is successful, False otherwise.
         """
         try:
             user = self._db.find_user_by(email=email)
-            return bcrypt.checkpw(password.encode('utf-8'),
-                                  user.hashed_password.encode('utf-8'))
+            if user:
+                return bcrypt.checkpw(password.encode('utf-8'),
+                                      user.hashed_password.encode('utf-8'))
+            return False
         except NoResultFound:
             return False
 
     def create_session(self, email: str) -> str:
-        """
-        Create a session for the user.
+        """Create a session for the user.
 
         Args:
             email (str): The email of the user.
@@ -64,32 +77,30 @@ class Auth:
         Returns:
             str: The session ID.
         """
-        try:
-            user = self._db.find_user_by(email=email)
-            session_id = self._generate_uuid()
+        user = self._db.find_user_by(email=email)
+        if user:
+            session_id = str(uuid.uuid4())
             self._db.update_user(user.id, session_id=session_id)
             return session_id
-        except NoResultFound:
-            raise ValueError("User not found")
+        return None
 
-    def _hash_password(self, password: str) -> str:
-        """
-        Hash a password.
+    def get_user_from_session_id(self, session_id: str) -> Union[User, None]:
+        """Retrieve user from session ID.
 
         Args:
-            password (str): The password to hash.
+            session_id (str): The session ID.
 
         Returns:
-            str: The hashed password.
+            Union[User, None]: The corresponding User object or None.
         """
-        salt = bcrypt.gensalt()
-        return bcrypt.hashpw(password.encode('utf-8'), salt)
+        if session_id:
+            return self._db.find_user_by(session_id=session_id)
+        return None
 
     def _generate_uuid(self) -> str:
-        """
-        Generate a new UUID.
+        """Generate a UUID string.
 
         Returns:
-            str: A string representation of the generated UUID.
+            str: The generated UUID.
         """
         return str(uuid.uuid4())
