@@ -54,6 +54,24 @@ class Auth:
         except NoResultFound:
             return False
 
+    def create_session(self, email: str) -> str:
+        """
+        Create a session for the user.
+
+        Args:
+            email (str): The email of the user.
+
+        Returns:
+            str: The session ID.
+        """
+        try:
+            user = self._db.find_user_by(email=email)
+            session_id = self._generate_uuid()
+            self._db.update_user(user.id, session_id=session_id)
+            return session_id
+        except NoResultFound:
+            raise ValueError("User not found")
+
     def _hash_password(self, password: str) -> str:
         """
         Hash a password.
