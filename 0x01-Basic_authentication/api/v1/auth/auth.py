@@ -6,6 +6,7 @@ Manages the API authentication.
 from typing import List
 from flask import Flask, request
 
+
 class Auth:
     """ Auth class for API authentication
     """
