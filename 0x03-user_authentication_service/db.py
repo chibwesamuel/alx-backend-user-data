@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
 """
+<<<<<<< HEAD
 Implements the add_user method.
 """
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+=======
+Implements the different requirements for DB module
+"""
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound
+>>>>>>> ef028b53ee4110293904de166ea597d6276bbfe2
 from typing import Any
 
 from user import Base, User
@@ -46,4 +55,30 @@ class DB:
         new_user = User(email=email, hashed_password=hashed_password)
         self._session.add(new_user)
         self._session.commit()
+<<<<<<< HEAD
         return new_user
+=======
+        return new_user
+
+    def find_user_by(self, **kwargs: Any) -> User:
+        """
+        Find a user by the given criteria
+
+        Args:
+            **kwargs: Arbitrary keyword arguments for filtering the query
+
+        Returns:
+            User: The first user found matching the given criteria
+
+        Raises:
+            NoResultFound: If no user is found matching the given criteria
+            InvalidRequestError: If wrong query arguments are passed
+        """
+        try:
+            user = self._session.query(User).filter_by(**kwargs).first()
+            if user is None:
+                raise NoResultFound
+            return user
+        except InvalidRequestError:
+            raise
+>>>>>>> ef028b53ee4110293904de166ea597d6276bbfe2
