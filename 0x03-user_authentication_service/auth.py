@@ -95,7 +95,10 @@ class Auth:
             Union[User, None]: The corresponding User object or None.
         """
         if session_id:
-            return self._db.find_user_by(session_id=session_id)
+            try:
+                return self._db.find_user_by(session_id=session_id)
+            except NoResultFound:
+                return None
         return None
 
     def _generate_uuid(self) -> str:
