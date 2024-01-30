@@ -20,6 +20,8 @@ if getenv("AUTH_TYPE") == "auth":
 
 @app.before_request
 def before_request():
+    """Before request module
+    """
     if auth is None:
         return
     excluded_paths = ['/api/v1/status/', '/api/v1/unauthorized/',
