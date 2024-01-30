@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 from typing import List
-from flask import request
-
+from flask import Flask, request
 
 class Auth:
     """ Auth class for API authentication
@@ -12,7 +11,8 @@ class Auth:
         """ Check if authentication is required for a path
         Args:
             path (str): The path to check for authentication requirement.
-            excluded_paths (List[str]): List of paths excluded from authentication.
+            excluded_paths (List[str]): List of paths excluded from
+            authentication.
         Returns:
             bool: True if authentication is required, False otherwise.
         """
@@ -36,3 +36,11 @@ class Auth:
         """
         return None
 
+
+if __name__ == "__main__":
+    app = Flask(__name__)
+    with app.test_request_context('/'):
+        a = Auth()
+        print(a.require_auth("/api/v1/status/", ["/api/v1/status/"]))
+        print(a.authorization_header())
+        print(a.current_user())
