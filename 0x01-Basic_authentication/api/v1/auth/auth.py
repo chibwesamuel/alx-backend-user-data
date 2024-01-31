@@ -22,8 +22,17 @@ class Auth:
         """
         if path is None:
             return True
-        if not excluded_paths or path.rstrip('/') not in excluded_paths:
-            return False
+
+        if not excluded_paths:
+            return True
+
+        for excluded_path in excluded_paths:
+            if excluded_path.endswith("*"):
+                if path.startswith(excluded_path.rstrip("*")):
+                    return False
+            elif path.rstrip('/') == excluded_path.rstrip('/'):
+                return False
+
         return True
 
     def authorization_header(self, request=None) -> str:
@@ -56,5 +65,7 @@ if __name__ == "__main__":
     with app.test_request_context('/'):
         a = Auth()
         print(a.require_auth("/api/v1/status/", ["/api/v1/status/"]))
+        print(a.require_auth("/api/v1/users", ["/api/v1/stat*"]))
+        print(a.require_auth("/api/v1/stats", ["/api/v1/stat*"]))
         print(a.authorization_header())
         print(a.current_user())
