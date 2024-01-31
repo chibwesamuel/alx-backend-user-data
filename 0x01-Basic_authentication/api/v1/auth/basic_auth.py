@@ -44,11 +44,31 @@ class BasicAuth(Auth):
         except base64.binascii.Error:
             return None  # Catch specific exception for base64 decoding error
 
+    def extract_user_credentials(
+            self, decoded_base64_authorization_header: str
+            ) -> (str, str):
+        """ Extracts the user credentials from the Base64 decoded header
+        Args:
+            decoded_base64_authorization_header (str): Decoded Base64 header.
+        Returns:
+            Tuple[str, str]: User email and password.
+        """
+        if (decoded_base64_authorization_header is None or
+                not isinstance(decoded_base64_authorization_header, str) or
+                ':' not in decoded_base64_authorization_header):
+            return None, None
+        return tuple(decoded_base64_authorization_header.split(':', 1))
+
 
 if __name__ == "__main__":
     """Main function of the module
     """
     a = BasicAuth()
+    print(a.extract_user_credentials(None))
+    print(a.extract_user_credentials(89))
+    print(a.extract_user_credentials("Holberton School"))
+    print(a.extract_user_credentials("Holberton:School"))
+    print(a.extract_user_credentials("bob@gmail.com:toto1234"))
     print(a.extract_base64_authorization_header(None))
     print(a.extract_base64_authorization_header(89))
     print(a.extract_base64_authorization_header("Holberton School"))
