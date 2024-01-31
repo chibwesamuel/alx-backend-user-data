@@ -4,6 +4,7 @@ Class that inherits from auth
 """
 from api.v1.auth.auth import Auth
 import base64
+from models.user import User
 
 
 class BasicAuth(Auth):
@@ -59,6 +60,30 @@ class BasicAuth(Auth):
             return None, None
         return tuple(decoded_base64_authorization_header.split(':', 1))
 
+    def user_object_from_credentials(
+            self, user_email: str, user_pwd: str) -> User:
+        """ Returns the User instance based on email and password
+        Args:
+            user_email (str): User email.
+            user_pwd (str): User password.
+        Returns:
+            User: User instance if found, None otherwise.
+        """
+        if user_email is None or not isinstance(user_email, str):
+            return None
+        if user_pwd is None or not isinstance(user_pwd, str):
+            return None
+
+        users = User.search({'email': user_email})
+        if not users:
+            return None
+
+        user = users[0]
+        if user.is_valid_password(user_pwd):
+            return user
+        else:
+            return None
+
 
 if __name__ == "__main__":
     """Main function of the module
@@ -69,11 +94,16 @@ if __name__ == "__main__":
     print(a.extract_user_credentials("Holberton School"))
     print(a.extract_user_credentials("Holberton:School"))
     print(a.extract_user_credentials("bob@gmail.com:toto1234"))
-    print(a.extract_base64_authorization_header(None))
-    print(a.extract_base64_authorization_header(89))
-    print(a.extract_base64_authorization_header("Holberton School"))
-    print(a.extract_base64_authorization_header("SG9sYmVydG9u"))
-    print(a.extract_base64_authorization_header("SG9sYmVydG9uIFNjaG9vbA=="))
-    print(a.decode_base64_authorization_header(
-        a.extract_base64_authorization_header(
-            "Basic SG9sYmVydG9uIFNjaG9vbA==")))
+
+    user_email = "test@example.com"
+    user_pwd = "password"
+    user = User()
+    user.email = user_email
+    user.password = user_pwd
+    user.save()
+
+    print(a.user_object_from_credentials(None, None))
+    print(a.user_object_from_credentials(89, 98))
+    print(a.user_object_from_credentials("email@notfound.com", "pwd"))
+    print(a.user_object_from_credentials(user_email, "pwd"))
+    print(a.user_object_from_credentials(user_email, user_pwd))
