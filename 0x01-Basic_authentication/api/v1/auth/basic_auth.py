@@ -3,6 +3,7 @@
 Class that inherits from auth
 """
 from api.v1.auth.auth import Auth
+import base64
 
 
 class BasicAuth(Auth):
@@ -25,6 +26,24 @@ class BasicAuth(Auth):
             return None
         return authorization_header.split(" ", 1)[-1]
 
+    def decode_base64_authorization_header(
+            self, base64_authorization_header: str
+            ) -> str:
+        """ Decodes the Base64 authorization header
+        Args:
+            base64_authorization_header (str): Base64 encoded header string.
+        Returns:
+            str: Decoded value of the Base64 header.
+        """
+        if base64_authorization_header is None or not isinstance(
+                base64_authorization_header, str):
+            return None
+        try:
+            decoded_bytes = base64.b64decode(base64_authorization_header)
+            return decoded_bytes.decode('utf-8')
+        except base64.binascii.Error:
+            return None  # Catch specific exception for base64 decoding error
+
 
 if __name__ == "__main__":
     """Main function of the module
@@ -33,8 +52,8 @@ if __name__ == "__main__":
     print(a.extract_base64_authorization_header(None))
     print(a.extract_base64_authorization_header(89))
     print(a.extract_base64_authorization_header("Holberton School"))
-    print(a.extract_base64_authorization_header("Basic Holberton"))
-    print(a.extract_base64_authorization_header("Basic SG9sYmVydG9u"))
-    print(a.extract_base64_authorization_header
-          ("Basic SG9sYmVydG9uIFNjaG9vbA=="))
-    print(a.extract_base64_authorization_header("Basic1234"))
+    print(a.extract_base64_authorization_header("SG9sYmVydG9u"))
+    print(a.extract_base64_authorization_header("SG9sYmVydG9uIFNjaG9vbA=="))
+    print(a.decode_base64_authorization_header(
+        a.extract_base64_authorization_header(
+            "Basic SG9sYmVydG9uIFNjaG9vbA==")))
