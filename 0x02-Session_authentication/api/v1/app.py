@@ -20,27 +20,32 @@ if auth_type == "basic_auth":
 else:
     auth = Auth()
 
+
 @app.before_request
 def before_request():
     """Before request handler
     """
     if auth is None:
         return
-    excluded_paths = ['/api/v1/status/', '/api/v1/unauthorized/', '/api/v1/forbidden/']
+    excluded_paths = ['/api/v1/status/', '/api/v1/unauthorized/',
+                      '/api/v1/forbidden/']
     if request.path not in excluded_paths:
         if auth.authorization_header(request) is None:
             abort(401)
         request.current_user = auth.current_user(request)
+
 
 @app.errorhandler(404)
 def not_found(error):
     """ Not found handler """
     return jsonify({"error": "Not found"}), 404
 
+
 @app.errorhandler(401)
 def unauthorized(error):
     """ Unauthorized handler """
     return jsonify({"error": "Unauthorized"}), 401
+
 
 @app.errorhandler(403)
 def forbidden(error):
