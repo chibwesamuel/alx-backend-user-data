@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
+"""Defines an Auth class for user authentication
+"""
 
 import uuid
 from typing import Union
+import bcrypt  # Import bcrypt for password hashing
 from db import DB
 from user import User
 from sqlalchemy.orm.exc import NoResultFound
 
 
 class Auth:
-    """Auth class to interact with the authentication database.
-    """
+    """Auth class to interact with the authentication database."""
 
     def __init__(self):
         self._db = DB()
@@ -36,15 +38,17 @@ class Auth:
             Union[User, None]: The newly created User object,
             or None if user already exists.
         """
-        try:
-            user = self._db.find_user_by(email=email)
-            if user:
-                raise ValueError(f"User {email} already exists")
-        except NoResultFound:
-            hashed_password = self._hash_password(password)
-            user = self._db.add_user(email=email,
-                                     hashed_password=hashed_password)
-            return user
+        # Check if user already exists
+        existing_user = self._db.find_user_by(email=email)
+        if existing_user:
+            raise ValueError(f"User {email} already exists")
+
+        # Hash the password
+        hashed_password = self._hash_password(password)
+
+        # Add user to the database
+        user = self._db.add_user(email=email, hashed_password=hashed_password)
+        return user
 
     def valid_login(self, email: str, password: str) -> bool:
         """Validate user login credentials.
